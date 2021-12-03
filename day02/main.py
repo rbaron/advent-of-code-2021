@@ -1,5 +1,3 @@
-from functools import reduce
-
 
 def part1(instrs):
     hor = depth = 0
