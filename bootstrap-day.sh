@@ -16,15 +16,11 @@ def part2(input_data):
     pass
 
 
-def main():
+if __name__ == '__main__':
     with open('test-input.txt', 'r') as f:
         input_data = [int(l) for l in f]
 
     part1(input_data)
     part2(input_data)
-
-
-if __name__ == '__main__':
-    main()
 
 EOF
