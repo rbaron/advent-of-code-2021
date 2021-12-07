@@ -9,7 +9,7 @@ touch "${DIR}/input.txt"
 cat > "${DIR}/main.py"  <<- EOF
 
 def part1(input_data):
-    pass
+    print(input_data)
 
 
 def part2(input_data):
