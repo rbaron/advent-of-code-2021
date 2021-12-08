@@ -7,6 +7,16 @@ def part1(outputs):
 
 
 def part2(all_unique_sigs, all_outputs):
+    ''' Segment coordinate system:
+
+      000
+     5   1
+     5   1
+      666
+     4   2
+     4   2
+      333
+    '''
     def decode(sig_by_segment, output):
         segment_by_sig = {
             next(iter(sig)): seg for seg, sig in sig_by_segment.items()
