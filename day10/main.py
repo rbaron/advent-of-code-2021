@@ -57,12 +57,8 @@ def part2(lines):
                 stack.pop()
         return calc_score(reversed(stack[1:]))
 
-    # print(eval_syntax('[({(<(())[]>[[{[]{<()<>>'))
-    # sccores = sorted([calc_score]
     scores = [eval_syntax(l) for l in lines]
     sorted_scores = sorted(s for s in scores if s > 0)
-    # print(sorted_scores[len])
-    # print(len(sorted_scores))
     return sorted_scores[len(sorted_scores) // 2]
 
 
