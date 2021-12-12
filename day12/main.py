@@ -14,20 +14,20 @@ def part1(cavemap):
 
 
 def part2(cavemap):
-    def find_paths(cave, visit_count):
+    def find_paths(cave, visit_count, has_double_visit):
         if cave == 'end':
             return 1
         elif ((cave == 'start' and visit_count['start'] > 0)
               or (visit_count[cave] == 2)
-              or (visit_count[cave] == 1
-                  and any(count > 1 for c, count in visit_count.items() if c != cave))):
+              or (visit_count[cave] == 1 and has_double_visit)):
             return 0
-
         new_visit_count = copy(visit_count)
-        if cave.islower():
-            new_visit_count[cave] += 1
-        return sum(find_paths(next_cave, new_visit_count) for next_cave in cavemap[cave])
-    return find_paths('start', defaultdict(int))
+        new_visit_count[cave] += 1 if cave.islower() else 0
+        return sum(find_paths(next_cave,
+                              new_visit_count,
+                              has_double_visit or visit_count[cave] >= 1)
+                   for next_cave in cavemap[cave])
+    return find_paths('start', defaultdict(int), False)
 
 
 if __name__ == '__main__':
