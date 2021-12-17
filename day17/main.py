@@ -1,59 +1,60 @@
 from collections import defaultdict
-import itertools
-from functools import cache
-import math
 
 
-def find_valid_speeds(target_area):
-    (minx, maxx), (miny, maxy) = target_area
+def part1(target_area):
+    _, (miny, maxy) = target_area
 
-    def simy(vy0):
-        max_y = 0
-        y = 0
-        vy = vy0
-        t = 0
+    total_max_y = 0
+    for v0y in range(miny, -miny+1):
+        max_y = y = t = 0
+        vy = v0y
         while y >= miny:
             if miny <= y <= maxy:
-                yield (vy0, t, max_y)
+                total_max_y = max(total_max_y, max_y)
             y += vy
             max_y = max(max_y, y)
             vy -= 1
             t += 1
-
-    def simx(vx0, t):
-        x = 0
-        vx = vx0
-        for _ in range(t):
-            x += vx
-            vx = max(vx - 1, 0)
-        if minx <= x <= maxx:
-            yield vx0
-
-    valid_vy0 = [sol for vy0 in range(-500, 500)
-                 for sol in simy(vy0)]
-
-    def group_by_t(valid):
-        vs_by_t = defaultdict(list)
-        for v, t, max_y in valid:
-            vs_by_t[t].append((v, max_y))
-        return vs_by_t
-
-    valid_initial_speeds = []
-    for t, vys in group_by_t(valid_vy0).items():
-        for vx0 in range(500):
-            for vx in simx(vx0, t):
-                for vy in vys:
-                    valid_initial_speeds.append((vx, vy[0], vy[1]))
-
-    return set(valid_initial_speeds)
-
-
-def part1(target_area):
-    return max(max_y for _, _, max_y in find_valid_speeds(target_area))
+    return total_max_y
 
 
 def part2(target_area):
-    return len(find_valid_speeds(target_area))
+    (minx, maxx), (miny, maxy) = target_area
+
+    y_solutions = defaultdict(set)
+
+    # Simulate y.
+    for v0y in range(miny, -miny+1):
+        y = t = 0
+        vy = v0y
+        while y >= miny:
+            if miny <= y <= maxy:
+                y_solutions[t].add(v0y)
+            y += vy
+            vy -= 1
+            t += 1
+
+    # For each t that satisfies the y constraint, check whether
+    # or not it also satisfies the x constraint.
+    x_solutions = defaultdict(set)
+    for ty in y_solutions:
+        for vx0 in range(maxx+1):
+            x = 0
+            vx = vx0
+            for _ in range(ty):
+                x += vx
+                vx = max(vx-1, 0)
+            if minx <= x <= maxx:
+                x_solutions[ty].add(vx0)
+
+    combinations = set(
+        (vx0, vy0)
+        for t, y_sols in y_solutions.items()
+        for vy0 in y_sols
+        for vx0 in x_solutions[t]
+    )
+
+    return len(combinations)
 
 
 if __name__ == '__main__':
