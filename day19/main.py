@@ -46,23 +46,35 @@ def beacons_in_common(scans1, scans2):
 
 
 def part1(scans):
-    # @cache
-    def dfs(scanidx, scan, origin, visited):
+    visited = set()
+    origins = {0: (0, 0, 0)}
+
+    def dfs(scanidx, scan):
         if scanidx in visited:
             return set()
+        visited.add(scanidx)
 
-        seen = set()
-        for i, next_scan in enumerate(scans):
-            for next_rotated in rotations(next_scan):
-                common, d = beacons_in_common(scan, next_rotated)
-                # If found some connection, recurse there.
+        if len(scan) == 0:
+            return set()
+
+        seen = {tuple(b) for b in scan}
+
+        for j, otherscan in enumerate(scans):
+            if scanidx == j:
+                continue
+            for otherrotated in rotations(otherscan):
+                common, d = beacons_in_common(scan, otherrotated)
                 if len(common) > 0:
-                    seen |= {tuple(c - origin) for c in common}
-                    seen |= dfs(i, next_rotated, origin +
-                                d, visited | {scanidx})
+                    # print(f'{j}, {d}')
+                    # origins[j] = d
+                    print('Found!')
+                    rec_seen = dfs(j, otherrotated)
+                    seen |= {tuple(r - d) for r in rec_seen}
         return seen
 
-    return len(dfs(0, scans[0], (0, 0, 0), set()))
+    for i, orig in origins.items():
+        print(i, orig)
+    return len(dfs(0, scans[0]))
 
 
 def part2(scans):
@@ -79,9 +91,5 @@ if __name__ == '__main__':
         scan_blocks = f.read().split('\n\n')
         scans = [parse_scan_blk(blk) for blk in scan_blocks]
 
-    # vv = scans[0][0]
-    # import ipdb
-    # ipdb.set_trace()
-    # scans = scans[:8]
     print(part1(scans))
     print(part2(scans))
