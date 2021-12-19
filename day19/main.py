@@ -1,7 +1,9 @@
 import itertools
 from functools import cache
+from re import I
 import numpy as np
 from numpy.linalg import matrix_power
+from collections import defaultdict
 
 # https://en.wikipedia.org/wiki/Rotation_matrix
 # sin(90) = 1
@@ -45,9 +47,20 @@ def beacons_in_common(scans1, scans2):
     return set(), 0
 
 
-def part1(scans):
+def dist_from0(j, origins):
+    for dist, fromn in origins[j]:
+        try:
+            if j == 0:
+                return 0
+            return np.array(dist) + dist_from0(fromn, origins)
+        except RecursionError:
+            continue
+
+
+def find_beacons(scans):
     visited = set()
-    origins = {0: (0, 0, 0)}
+    origins = defaultdict(list)
+    origins[0].append(((0, 0, 0), 0))
 
     def dfs(scanidx, scan):
         if scanidx in visited:
@@ -65,20 +78,21 @@ def part1(scans):
             for otherrotated in rotations(otherscan):
                 common, d = beacons_in_common(scan, otherrotated)
                 if len(common) > 0:
-                    # print(f'{j}, {d}')
-                    # origins[j] = d
-                    print('Found!')
+                    origins[j].append((-d, scanidx))
                     rec_seen = dfs(j, otherrotated)
                     seen |= {tuple(r - d) for r in rec_seen}
         return seen
 
-    for i, orig in origins.items():
-        print(i, orig)
-    return len(dfs(0, scans[0]))
+    n_beacons = len(dfs(0, scans[0]))
 
-
-def part2(scans):
-    pass
+    positions = {
+        i: dist_from0(i, origins)
+        for i in origins
+    }
+    max_dist = max(
+        np.sum(np.abs(np.array(positions[i]) - positions[j]))
+        for i, j in itertools.combinations(positions.keys(), r=2))
+    return n_beacons, max_dist
 
 
 if __name__ == '__main__':
@@ -91,5 +105,6 @@ if __name__ == '__main__':
         scan_blocks = f.read().split('\n\n')
         scans = [parse_scan_blk(blk) for blk in scan_blocks]
 
-    print(part1(scans))
-    print(part2(scans))
+    n_beacons, max_dist = find_beacons(scans)
+    print(n_beacons)
+    print(max_dist)
